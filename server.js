@@ -3,8 +3,14 @@ import sqlite3 from "sqlite3";
 import cors from "cors";
 
 const app = express();
+// CORSミドルウェアを先に設定し、すべてのリクエストを許可する
+app.use(cors({
+  origin: '*', // すべてのオリジンを許可
+  methods: 'GET,POST,OPTIONS',
+  allowedHeaders: 'Content-Type, Authorization'
+}));
+
 app.use(express.json());
-app.use(cors());
 
 // ---- DB（データベース）の設定 ----
 const db = new sqlite3.Database("./votes.db"); // DBファイル名を変更

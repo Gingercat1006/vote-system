@@ -15,7 +15,7 @@ export default function App() {
     }
 
     // バックエンドに選択した出し物だけを送る
-    const res = await fetch("https://vote-system-t4tn.onrender.com/vote", {
+    const res = await fetch("https://vote-api-final.onrender.com/vote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ booth: selected }), // codeを削除
