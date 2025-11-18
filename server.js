@@ -25,7 +25,7 @@ db.run(`
 `);
 
 // ---- 管理者用のパスワード ----
-const ADMIN_PASSWORD = "admin-pass-123"; // ★必ず後で変えてください
+const ADMIN_PASSWORD = "ikaretinpo"; // ★必ず後で変えてください
 
 // ---- リクエストからIPアドレスを取得する関数 ----
 function getClientIp(req) {
