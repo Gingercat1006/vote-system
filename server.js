@@ -72,5 +72,5 @@ app.get("/admin/results", (req, res) => {
 });
 
 // ---- サーバーの起動 ----
-const PORT = 3001;
-app.listen(PORT, () => console.log(`サーバーが http://localhost:${PORT} で起動しました`));
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => console.log(`サーバーがポート ${PORT} で起動しました`));
