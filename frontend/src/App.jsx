@@ -15,7 +15,7 @@ export default function App() {
     }
 
     // バックエンドに選択した出し物だけを送る
-    const res = await fetch("http://localhost:3001/vote", {
+    const res = await fetch("https://vote-api-ezon.onrender.com/vote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ booth: selected }), // codeを削除

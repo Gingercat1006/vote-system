@@ -13,7 +13,7 @@ export default function Admin() {
 
     try {
       // ★注意： 'localhost:3001' の部分は、公開時にはサーバーのURLに変えます
-      const res = await fetch(`http://localhost:3001/admin/results?pass=${password}`);
+      const res = await fetch(`https://vote-api-ezon.onrender.com/admin/results?pass=${password}`);
       const data = await res.json();
 
       if (!res.ok) return setError(data.error || "データの取得に失敗しました");
