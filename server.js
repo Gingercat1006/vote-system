@@ -1,80 +1,86 @@
 import express from "express";
-import sqlite3 from "sqlite3";
 import cors from "cors";
+import pg from "pg"; // sqlite3の代わりにpgをインポート
 
 const app = express();
-// CORSミドルウェアを先に設定し、すべてのリクエストを許可する
-app.use(cors({
-  origin: '*', // すべてのオリジンを許可
-  methods: 'GET,POST,OPTIONS',
-  allowedHeaders: 'Content-Type, Authorization'
-}));
 
+// CORSミドルウェアを先に設定
+app.use(cors({ origin: '*', methods: 'GET,POST,OPTIONS' }));
 app.use(express.json());
 
-// ---- DB（データベース）の設定 ----
-const db = new sqlite3.Database("./votes.db"); // DBファイル名を変更
-
-// 投票テーブルを作成（IPアドレスを記録する形式に）
-db.run(`
-  CREATE TABLE IF NOT EXISTS votes (
-    ip TEXT PRIMARY KEY,
-    booth TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )
-`);
-
-// ---- 管理者用のパスワード ----
-const ADMIN_PASSWORD = "ikaretinpo"; // ★必ず後で変えてください
-
-// ---- リクエストからIPアドレスを取得する関数 ----
-function getClientIp(req) {
-  return (
-    req.headers["x-forwarded-for"]?.split(",").shift() || req.socket.remoteAddress
-  );
-}
-
-// ---- API（機能の入り口）の作成 ----
-
-// (1) 投票を受け付けるAPI
-app.post("/vote", (req, res) => {
-  const ip = getClientIp(req);
-  const { booth } = req.body;
-
-  if (!booth) {
-    return res.status(400).json({ error: "booth is required" });
+// ---- PostgreSQLデータベースへの接続設定 ----
+const pool = new pg.Pool({
+  // Renderの環境変数から接続URLを取得
+  connectionString: process.env.DATABASE_URL,
+  // RenderのPostgreSQLに接続するために推奨される設定
+  ssl: {
+    rejectUnauthorized: false
   }
-
-  // IPアドレスが既に投票済みかチェック
-  db.get("SELECT * FROM votes WHERE ip = ?", [ip], (err, row) => {
-    if (row) {
-      return res.status(403).json({ message: "既に投票済みです" });
-    }
-
-    // 初めてのIPなら、投票内容を記録
-    db.run("INSERT INTO votes (ip, booth) VALUES (?, ?)", [ip, booth], (err) => {
-      if (err) {
-        return res.status(500).json({ error: "データベースエラーが発生しました" });
-      }
-      res.json({ message: "投票ありがとうございました！" });
-    });
-  });
 });
 
-// (2) 集計結果を返すAPI (変更なし)
-app.get("/admin/results", (req, res) => {
+// ---- 起動時にテーブルが存在するか確認し、なければ作成する ----
+const createTable = async () => {
+  const queryText = `
+    CREATE TABLE IF NOT EXISTS votes (
+      ip TEXT PRIMARY KEY,
+      booth TEXT NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `;
+  try {
+    await pool.query(queryText);
+    console.log("テーブルの準備ができました");
+  } catch (err) {
+    console.error("テーブル作成中にエラーが発生", err);
+  }
+};
+createTable();
+
+// ---- 管理者用のパスワード ----
+const ADMIN_PASSWORD = "admin-pass-123";
+
+// ---- IPアドレスを取得する関数 ----
+function getClientIp(req) {
+  return (req.headers["x-forwarded-for"]?.split(",").shift() || req.socket.remoteAddress);
+}
+
+// ---- APIの作成 (PostgreSQL版) ----
+
+// (1) 投票を受け付けるAPI
+app.post("/vote", async (req, res) => {
+  const ip = getClientIp(req);
+  const { booth } = req.body;
+  if (!booth) return res.status(400).json({ error: "booth is required" });
+
+  try {
+    // IPが既に存在するかチェック
+    const checkRes = await pool.query("SELECT * FROM votes WHERE ip = $1", [ip]);
+    if (checkRes.rows.length > 0) {
+      return res.status(403).json({ message: "既に投票済みです" });
+    }
+    // 投票を記録
+    await pool.query("INSERT INTO votes (ip, booth) VALUES ($1, $2)", [ip, booth]);
+    res.json({ message: "投票ありがとうございました！" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "データベースエラーが発生しました" });
+  }
+});
+
+// (2) 集計結果を返すAPI
+app.get("/admin/results", async (req, res) => {
   const { pass } = req.query;
   if (pass !== ADMIN_PASSWORD) {
     return res.status(403).json({ error: "管理者パスワードが違います" });
   }
 
-  db.all(
-    "SELECT booth, COUNT(*) AS count FROM votes GROUP BY booth ORDER BY count DESC",
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: "DB error" });
-      res.json(rows);
-    }
-  );
+  try {
+    const results = await pool.query("SELECT booth, COUNT(*) AS count FROM votes GROUP BY booth ORDER BY count DESC");
+    res.json(results.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "DB error" });
+  }
 });
 
 // ---- サーバーの起動 ----
