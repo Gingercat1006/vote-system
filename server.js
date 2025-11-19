@@ -2,6 +2,15 @@ import express from "express";
 import cors from "cors";
 import pg from "pg"; // sqlite3の代わりにpgをインポート
 
+const ALLOWED_BOOTHS = [
+  "お化け屋敷", "焼きそば", "ダンス", "展示", "ゲーム",
+  // ここに30個、好きなだけ追加してください！
+  "たこ焼き", "フランクフルト", "射的", "スーパーボールすくい", "わたあめ",
+  "金魚すくい", "ヨーヨー釣り", "バンド演奏", "演劇", "お茶会",
+  "フリーマーケット", "古本市", "プログラミング展示", "書道パフォーマンス", "華道展示",
+  "写真展", "映画上映", "クイズ大会", "のど自慢大会", "eスポーツ大会"
+];
+
 const app = express();
 
 // CORSミドルウェアを先に設定
@@ -46,12 +55,23 @@ function getClientIp(req) {
 
 // ---- APIの作成 (PostgreSQL版) ----
 
-// (1) 投票を受け付けるAPI
+// (ここから追加) フロントエンドに出し物の一覧を渡すAPI
+app.get("/booths", (req, res) => {
+  res.json(ALLOWED_BOOTHS);
+});
+// (ここまで追加)
+
+// (1) 投票を受け付けるAPI (チェック機能を追加)
 app.post("/vote", async (req, res) => {
   const ip = getClientIp(req);
   const { booth } = req.body;
   if (!booth) return res.status(400).json({ error: "booth is required" });
 
+  // (ここから追加) 許可された出し物かチェック
+  if (!ALLOWED_BOOTHS.includes(booth)) {
+    return res.status(400).json({ error: "Invalid booth name" });
+  }
+  
   try {
     // IPが既に存在するかチェック
     const checkRes = await pool.query("SELECT * FROM votes WHERE ip = $1", [ip]);
