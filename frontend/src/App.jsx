@@ -21,7 +21,7 @@ export default function App() {
       return alert("出し物を選択してください");
     }
 
-    const res = await fetch("https://vote-system-t4tn.onrender.com/vote", {
+    const res = await fetch("https://vote-api-final.onrender.com/vote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ booth: selected }),
