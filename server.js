@@ -40,7 +40,7 @@ const createTable = async () => {
 createTable();
 
 // ---- 管理者用のパスワード ----
-const ADMIN_PASSWORD = "admin-pass-123";
+const ADMIN_PASSWORD = "sundai";
 
 // ---- IPアドレスを取得する関数 ----
 function getClientIp(req) {
