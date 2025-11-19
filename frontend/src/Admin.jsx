@@ -20,7 +20,7 @@ export default function Admin() {
       
       setResults(data);
       // 合計票数を計算
-      const total = data.reduce((sum, item) => sum + item.count, 0);
+     const total = data.reduce((sum, item) => sum + parseInt(item.count, 10), 0);
       setTotalVotes(total);
 
     } catch (err) {
