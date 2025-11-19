@@ -2,23 +2,8 @@ import express from "express";
 import cors from "cors";
 import pg from "pg";
 
-// =================================================================
-// ★ 出し物リスト ★
-// 出し物を追加・変更したい場合は、この配列の中身だけを編集してください
-// =================================================================
-const ALLOWED_BOOTHS = [
-  "お化け屋敷", "焼きそば", "ダンス", "展示", "ゲーム", "たこ焼き", 
-  "フランクフルト", "射的", "スーパーボールすくい", "わたあめ", "金魚すくい", 
-  "ヨーヨー釣り", "バンド演奏", "演劇", "お茶会", "フリーマーケット", 
-  "古本市", "プログラミング展示", "書道パフォーマンス", "華道展示", "写真展", 
-  "映画上映", "クイズ大会", "のど自慢大会", "eスポーツ大会"
-  // ここにカンマをつけて新しい出し物を追加できます
-];
-// =================================================================
-
 const app = express();
 
-// CORSミドルウェアを先に設定し、すべてのリクエストを許可
 app.use(cors());
 app.use(express.json());
 
@@ -30,7 +15,7 @@ const pool = new pg.Pool({
   }
 });
 
-// ---- 起動時にテーブルが存在するか確認し、なければ作成する ----
+// ---- 起動時にテーブルを準備する ----
 const createTable = async () => {
   const queryText = `
     CREATE TABLE IF NOT EXISTS votes (
@@ -60,20 +45,11 @@ function getClientIp(req) {
 // ★ API (機能の入り口) ★
 // =================================================================
 
-// (1) フロントエンドに出し物の一覧を渡すAPI
-app.get("/booths", (req, res) => {
-  res.json(ALLOWED_BOOTHS);
-});
-
-// (2) 投票を受け付けるAPI
+// (1) 投票を受け付けるAPI
 app.post("/vote", async (req, res) => {
   const ip = getClientIp(req);
   const { booth } = req.body;
   if (!booth) return res.status(400).json({ error: "booth is required" });
-
-  if (!ALLOWED_BOOTHS.includes(booth)) {
-    return res.status(400).json({ error: "Invalid booth name" });
-  }
 
   try {
     const checkRes = await pool.query("SELECT * FROM votes WHERE ip = $1", [ip]);
@@ -88,7 +64,7 @@ app.post("/vote", async (req, res) => {
   }
 });
 
-// (3) 集計結果を返すAPI
+// (2) 集計結果を返すAPI
 app.get("/admin/results", async (req, res) => {
   const { pass } = req.query;
   if (pass !== ADMIN_PASSWORD) {
