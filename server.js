@@ -4,7 +4,13 @@ import pg from "pg";
 
 const app = express();
 
-app.use(cors());
+// CORSミドルウェアを先に設定し、すべてのリクエストを許可する
+app.use(cors({
+  origin: '*', // すべてのオリジンを許可
+  methods: 'GET,POST,OPTIONS',
+  allowedHeaders: 'Content-Type'
+}));
+
 app.use(express.json());
 
 // ---- PostgreSQLデータベースへの接続設定 ----
