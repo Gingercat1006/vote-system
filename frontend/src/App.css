@@ -40,3 +40,91 @@
 .read-the-docs {
   color: #888;
 }
+/* 全体のコンテナ設定 */
+.container {
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 1rem;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+/* =================================================================
+   ★ ここからがグリッドレイアウトのための新しいスタイルです
+   ================================================================= */
+
+/* 選択肢を囲むグリッドのコンテナ */
+.options-grid {
+  display: flex; /* Flexboxを使って横並びにする */
+  flex-wrap: wrap; /* 画面幅に応じて折り返す */
+  justify-content: center; /* 中央揃えにする */
+  gap: 12px; /* ボタン同士の間隔 */
+  margin: 2rem 0;
+}
+
+/* 数字ボタンのスタイル（これがラベル要素） */
+.option-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 65px;  /* ボタンの幅 */
+  height: 65px; /* ボタンの高さ */
+  border: 2px solid #ccc;
+  border-radius: 10px; /* 角を丸くする */
+  cursor: pointer;
+  font-size: 1.5rem; /* 数字のフォントサイズ */
+  font-weight: bold;
+  transition: all 0.2s ease; /* アニメーション効果 */
+  user-select: none; /* テキスト選択を無効に */
+  box-sizing: border-box;
+}
+
+/* マウスを乗せたときのスタイル */
+.option-button:hover {
+  background-color: #f0f0f0;
+}
+
+/* 隠されたラジオボタン */
+.option-button input[type="radio"] {
+  display: none;
+}
+
+/* ★ 選択されたボタンのスタイル */
+.option-button.selected {
+  background-color: #007bff; /* 背景色を青に */
+  color: white; /* 文字色を白に */
+  border-color: #007bff; /* 枠線の色も青に */
+}
+
+/* ================================================================= */
+
+
+/* 投票ボタンのスタイル */
+.submit-button {
+  padding: 12px 24px;
+  font-size: 1.2rem;
+  border-radius: 8px;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+/* 投票ボタンにマウスを乗せたとき */
+.submit-button:hover {
+  background-color: #218838;
+}
+
+/* 投票ボタンが押せないときのスタイル */
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* メッセージのスタイル */
+.message {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+}

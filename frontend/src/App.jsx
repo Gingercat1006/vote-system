@@ -3,10 +3,9 @@ import './App.css';
 
 // =================================================================
 // ★ 出し物リスト ★
-// 01から55までの番号を自動で生成しています
+// 01から55までの番号を自動で生成
 // =================================================================
 const booths = Array.from({ length: 55 }, (_, i) => String(i + 1).padStart(2, '0'));
-// これは、["01", "02", "03", ..., "55"] という配列を自動で作るためのJavaScriptの書き方です。
 // =================================================================
 
 export default function App() {
@@ -45,23 +44,27 @@ export default function App() {
     <div className="container">
       <h2>一番良かった出し物は？</h2>
 
-      <div className="options">
+      {/* ここからが変更点！ options-grid というクラス名に変更 */}
+      <div className="options-grid">
         {booths.map((b) => (
-          <label key={b} className="option-label">
+          // ★ ラベルの構造を変更し、選択されたら 'selected' クラスが付くように
+          <label key={b} className={`option-button ${selected === b ? 'selected' : ''}`}>
+            {/* ラジオボタン自体は裏方に隠す */}
             <input
               type="radio"
-
               name="booth"
               value={b}
               checked={selected === b}
               onChange={(e) => setSelected(e.target.value)}
             />
-            {b}
+            {/* ユーザーにはこの数字が見える */}
+            <span>{b}</span>
           </label>
         ))}
       </div>
+      {/* 変更点ここまで */}
 
-      <button onClick={submitVote} className="submit-button">
+      <button onClick={submitVote} className="submit-button" disabled={!selected}>
         投票する
       </button>
 
