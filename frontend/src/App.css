@@ -121,3 +121,40 @@
   background-color: #007bff;
   color: white;
 }
+
+/* =================================================================
+   4. 管理者ページ (Admin.jsx) の並び替えボタンのスタイル
+   ================================================================= */
+
+/* ボタンを囲むコンテナ */
+.sort-buttons {
+  display: flex;
+  flex-wrap: wrap; /* スマホ表示などで折り返す */
+  gap: 10px; /* ボタン同士の間隔 */
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+
+/* 各ボタンの基本スタイル */
+.sort-button {
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  border: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+  color: #495057;
+  border-radius: 20px; /* 角を丸くして、タグのような見た目に */
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+/* ボタンにマウスを乗せたとき */
+.sort-button:hover {
+  background-color: #e9ecef;
+}
+
+/* ★ 現在選択されているボタンのスタイル */
+.sort-button.active {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
