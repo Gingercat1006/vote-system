@@ -14,12 +14,16 @@ app.use(cors({
 app.use(express.json());
 
 // ---- PostgreSQLデータベースへの接続設定 ----
-const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+const isProduction = process.env.NODE_ENV === 'production';
+
+const connectionConfig = {
+  // もし本番環境なら、RenderのURLを使い、SSLを有効にする
+  connectionString: isProduction ? process.env.DATABASE_URL : 'postgresql://postgres:011430@localhost:5432/postgres',
+  // もし本番環境なら、SSL設定を追加する
+  ssl: isProduction ? { rejectUnauthorized: false } : false
+};
+
+const pool = new pg.Pool(connectionConfig);
 
 // ---- 起動時にテーブルを準備する ----
 const createTable = async () => {

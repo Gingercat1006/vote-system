@@ -1,5 +1,4 @@
 import { useState } from "react";
-import './App.css';
 
 export default function Admin() {
   const [password, setPassword] = useState("");
@@ -12,15 +11,16 @@ export default function Admin() {
     if (!password) return setError("パスワードを入力してください");
 
     try {
-      // ★注意： 'localhost:3001' の部分は、公開時にはサーバーのURLに変えます
       const res = await fetch(`https://vote-api-final.onrender.com/admin/results?pass=${password}`);
       const data = await res.json();
 
-      if (!res.ok) return setError(data.error || "データの取得に失敗しました");
+      if (!res.ok) {
+        setResults([]); // エラー時は結果を空にする
+        return setError(data.error || "データの取得に失敗しました");
+      }
       
       setResults(data);
-      // 合計票数を計算
-     const total = data.reduce((sum, item) => sum + parseInt(item.count, 10), 0);
+      const total = data.reduce((sum, item) => sum + parseInt(item.count, 10), 0);
       setTotalVotes(total);
 
     } catch (err) {
@@ -28,11 +28,12 @@ export default function Admin() {
     }
   };
 
+  // ★ 変更点1：一番外側のdivに className="container" を追加
   return (
-    <div className="container">
+    <div className="container"> 
       <h2>管理者用ダッシュボード</h2>
 
-      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '20px', justifyContent: 'center' }}>
         <input
           type="password"
           placeholder="管理者パスワード"
@@ -40,27 +41,32 @@ export default function Admin() {
           onChange={(e) => setPassword(e.target.value)}
           className="code-input"
         />
-        <button onClick={fetchResults} className="submit-button">集計結果を表示</button>
+        <button onClick={fetchResults} className="admin-button">集計結果を表示</button>
       </div>
 
       {error && <p className="message" style={{ color: 'red' }}>{error}</p>}
 
       {results.length > 0 && (
-        <div>
+        // text-align: left を追加して、グラフのラベルが左揃えになるように
+        <div style={{ textAlign: 'left' }}>
           <h3>投票結果 (合計: {totalVotes}票)</h3>
           {results.map((item) => (
             <div key={item.booth} style={{ marginBottom: '10px' }}>
-              <p style={{ margin: 0 }}><strong>{item.booth}</strong>: {item.count} 票</p>
-              <div style={{ background: '#f0f0f0', borderRadius: '5px' }}>
+              <p style={{ margin: '0 0 4px 0' }}><strong>{item.booth}</strong>: {item.count} 票</p>
+              <div style={{ background: '#e9ecef', borderRadius: '5px', overflow: 'hidden' }}>
                 <div style={{
-                  width: `${(item.count / totalVotes) * 100}%`,
+                  // ★ 変更点2：totalVotesが0でないことを確認してから割り算する
+                  width: totalVotes > 0 ? `${(parseInt(item.count, 10) / totalVotes) * 100}%` : '0%',
+                  height: '24px',
                   background: '#007bff',
-                  height: '20px',
                   borderRadius: '5px',
                   color: 'white',
-                  textAlign: 'right',
-                  paddingRight: '5px',
-                  boxSizing: 'border-box'
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-end',
+                  paddingRight: '8px',
+                  boxSizing: 'border-box',
+                  transition: 'width 0.5s ease-in-out' // グラフが伸びるアニメーションを追加
                 }}>
                 </div>
               </div>
